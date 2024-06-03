@@ -1,4 +1,4 @@
-name: Deploy e-commerce-api
+name: Deploy test-1
 on:
   push:
     branches: 
