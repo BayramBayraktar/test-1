@@ -12,24 +12,23 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Login to docker hub
-        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+        run: echo ${{secrets.DOCKER_PASSWORD}} | docker login -u ${{secrets.DOCKER_USERNAME}} --password-stdin
       
       - name: Build Docker Image
-        run: docker build -t  bayrambayraktar/test-1 .
+        run: docker build -t bayrambayraktar/test-1 .
 
-      - name: Publis Image to docker hub
+      - name: Publish Image to docker hub
         run: docker push bayrambayraktar/test-1:latest
 
-    deploy: 
-      needs: build
-      runs-on: self-hosted
-      steps:
-        - name: Pull image from docker hub
-          run: docker pull bayrambayraktar/test-1:latest
+  deploy: 
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull bayrambayraktar/test-1:latest
 
-        - name: Delete old container
-          run: docker rm -f test-backend-container
+      - name: Delete old container
+        run: docker rm -f test-backend-container || true
 
-        - name: Run Docker Container
-          run: docker run -d -p 3000:3000 --name test-backend-container -e MONGO_PASSWORD='${{secrets.MONGO_PASSWORD}}' bayrambayraktar/test-1
-        
+      - name: Run Docker Container
+        run: docker run -d -p 3000:3000 --name test-backend-container -e MONGO_PASSWORD=${{secrets.MONGO_PASSWORD}} bayrambayraktar/test-1:latest
